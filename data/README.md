@@ -369,6 +369,4 @@ raw_docs.pkl
 | `generate_sft_data.py` | `train_qa_pair.json` | `train_data.json` + `summary_data/*` + `rerank_data/*` |
 | `infer.py` | 用户问题 | 模型回答 |
 
----
 
-*文档生成时间：2026-03-14*
