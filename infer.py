@@ -26,7 +26,7 @@ import ast
 from src.retriever.bm25_retriever import BM25
 from src.retriever.milvus_retriever import MilvusRetriever 
 from src.reranker.bge_m3_reranker import BGEM3ReRanker 
-from src.constant import bge_reranker_tuned_model_path
+from src.constant import bge_reranker_runtime_model_path
 from src.utils import merge_docs, post_processing
 
 # 添加 src 到路径
@@ -640,7 +640,7 @@ async def startup_event():
     if RUN_MODE == 'local':
         bm25_retriever = BM25(docs=None, retrieve=True)
         milvus_retriever = MilvusRetriever(docs=None, retrieve=True) 
-        bge_m3_reranker = BGEM3ReRanker(model_path=bge_reranker_tuned_model_path)
+        bge_m3_reranker = BGEM3ReRanker(model_path=bge_reranker_runtime_model_path)
         milvus_retriever.retrieve_topk("这是一条预热数据", topk=3)
     
     # 初始化 LLM 客户端（根据模式选择）

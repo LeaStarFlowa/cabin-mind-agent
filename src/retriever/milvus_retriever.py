@@ -2,6 +2,7 @@
 import time
 import hashlib
 import pandas as pd
+import torch
 from pymilvus import (
     connections,
     utility,
@@ -50,7 +51,8 @@ def _connect_local_milvus(uri: str, attempts: int = 6) -> None:
 
 
 _connect_local_milvus(milvus_db_path)
-embedding_handler = BGEM3EmbeddingFunction(model_name=bge_m3_model_path, device="cuda")
+embedding_device = "cuda" if torch.cuda.is_available() else "cpu"
+embedding_handler = BGEM3EmbeddingFunction(model_name=bge_m3_model_path, device=embedding_device)
 
 
 class MilvusRetriever:
@@ -195,5 +197,4 @@ if __name__ == "__main__":
     for res in results:
         print(res)
         print("="*100)
-
 

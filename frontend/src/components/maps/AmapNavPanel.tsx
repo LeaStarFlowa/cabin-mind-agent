@@ -10,7 +10,12 @@ import { useCabinStore } from "@/store/cabinStore";
 import { PlaceSearchField } from "@/components/maps/PlaceSearchField";
 import type { PlaceSearchHit } from "@/lib/api";
 
-const QUICK_DESTS = ["中关村软件园", "五道口地铁站", "西单大悦城", "北京西站"];
+const QUICK_DESTS = [
+  "大学城南地铁站",
+  "岭南印象园",
+  "广州美术学院大学城校区",
+  "广东科学中心",
+];
 
 type MapApi = {
   destroy: () => void;
@@ -608,7 +613,7 @@ function AmapNavPanelImpl({ open, onClose, onControl, busy }: Props) {
       <header className="amap-nav-head">
         <div>
           <em>导航</em>
-          <strong ref={hudRef}>北京理工大学中关村校区南门</strong>
+          <strong ref={hudRef}>{BIT_ORIGIN.name}</strong>
         </div>
         <div className="amap-head-actions">
           <button type="button" className="deck-inline-btn" onClick={onClose}>

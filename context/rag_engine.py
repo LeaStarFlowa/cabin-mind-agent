@@ -11,17 +11,19 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 from src.retriever.bm25_retriever import BM25
 from src.retriever.milvus_retriever import MilvusRetriever
 from src.reranker.bge_m3_reranker import BGEM3ReRanker
-from src.constant import bge_reranker_tuned_model_path
+from src.constant import bge_reranker_runtime_model_path
 from src.utils import merge_docs, post_processing, convert_db_path_to_local, to_absolute_path
 
 
 class RAGEngine:
     """RAG引擎 - 整合BM25、Milvus和重排序器"""
-    
+
     def __init__(self):
+        print(f"[RAG] 当前代码目录: {os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}")
+        print(f"[RAG] Reranker 模型: {bge_reranker_runtime_model_path}")
         self.bm25 = BM25(docs=None, retrieve=True)
         self.milvus = MilvusRetriever(docs=None, retrieve=True)
-        self.reranker = BGEM3ReRanker(model_path=bge_reranker_tuned_model_path)
+        self.reranker = BGEM3ReRanker(model_path=bge_reranker_runtime_model_path)
     
     def retrieve(self, query: str, topk: int = 5) -> List:
         """使用BM25 + Milvus + Reranker检索文档"""
