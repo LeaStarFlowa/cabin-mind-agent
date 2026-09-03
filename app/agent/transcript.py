@@ -191,7 +191,7 @@ class TranscriptStore:
             meta=meta or {},
         )
         with self.path.open("a", encoding="utf-8") as f:
-            f.write(msg.model_dump_json(ensure_ascii=False) + "\n")
+            f.write(msg.model_dump_json() + "\n")
         if self._cache is None:
             self._cache = []
         self._cache.append(msg)
@@ -248,7 +248,7 @@ class TranscriptStore:
         tmp = self.path.with_suffix(self.path.suffix + ".tmp")
         with tmp.open("w", encoding="utf-8") as f:
             for m in msgs:
-                f.write(m.model_dump_json(ensure_ascii=False) + "\n")
+                f.write(m.model_dump_json() + "\n")
         tmp.replace(self.path)
         self._cache = msgs
         if self._db and self._session_id:

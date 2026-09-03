@@ -73,12 +73,28 @@ def merge_docs(docs1, docs2):
     for doc in candidate_docs:
         parent_id = doc.metadata.get("parent_id")
         if parent_id:
-            parent_mg = manual_collection.find_one({"unique_id": parent_id})
-            unique_id = parent_mg["unique_id"]
+            try:
+                parent_mg = manual_collection.find_one({"unique_id": parent_id})
+            except Exception as exc:
+                print(f"[RAG] MongoDB 父文档回查失败，保留当前片段: {exc}")
+                parent_mg = None
+            if isinstance(parent_mg, dict) and parent_mg.get("page_content"):
+                unique_id = parent_mg.get("unique_id") or parent_id
+                if unique_id not in merged_ids:
+                    merged_ids.add(unique_id)
+                    metadata = parent_mg.get("metadata") or {}
+                    if not isinstance(metadata, dict):
+                        metadata = {}
+                    metadata.setdefault("unique_id", unique_id)
+                    parent_doc = Document(page_content=parent_mg["page_content"], metadata=metadata)
+                    merged_docs.append(parent_doc)
+                continue
+
+            # 索引与 MongoDB 不同步时仍保留当前片段，避免整个知识问答失败。
+            unique_id = doc.metadata.get("unique_id") or parent_id
             if unique_id and unique_id not in merged_ids:
                 merged_ids.add(unique_id)
-                parent_doc = Document(page_content=parent_mg["page_content"], metadata=parent_mg["metadata"])
-                merged_docs.append(parent_doc)
+                merged_docs.append(doc)
         else:
             unique_id = doc.metadata.get("unique_id")
             if unique_id and unique_id not in merged_ids:
@@ -105,12 +121,17 @@ def post_processing(response, docs):
     seen_images = set()  # 用于图片去重
     pages = []
     for index in cites:
-        if index > len(docs):
+        if index <= 0 or index > len(docs):
             continue
-        images = docs[index-1].metadata["images_info"]
-        pages.append(docs[index-1].metadata["page"])
+        metadata = docs[index-1].metadata or {}
+        if not isinstance(metadata, dict):
+            metadata = {}
+        images = metadata.get("images_info") or []
+        page = metadata.get("page") or metadata.get("page_number")
+        if page is not None:
+            pages.append(page)
         for image in images:
-            if image["title"]:
+            if isinstance(image, dict) and image.get("title"):
                 # 使用 image_path 作为唯一标识去重
                 image_path = image.get("image_path", "")
                 if image_path in seen_images:
