@@ -10,7 +10,7 @@ export const PRESET_QUESTIONS: PresetQuestion[] = [
   // —— 原页面快捷示例（优先展示）——
   { category: "tool", text: "我附近有哪些好吃的" },
   { category: "tool", text: "附近的充电站有哪些" },
-  { category: "tool", text: "帮我导航到中关村软件园" },
+  { category: "tool", text: "帮我导航到岭南印象园" },
   { category: "tool", text: "打开空调并播放周杰伦的晴天" },
   { category: "knowledge", text: "自动泊车怎么用" },
   { category: "tool", text: "打开飞书" },
@@ -36,8 +36,8 @@ export const PRESET_QUESTIONS: PresetQuestion[] = [
   // 控制指令
   { category: "tool", text: "我坐副驾，喜欢22度" },
   { category: "tool", text: "把空调打开" },
-  { category: "tool", text: "导航到中关村软件园，副驾空调22度，播放周杰伦的晴天" },
-  { category: "tool", text: "从当前位置导航到五道口地铁站" },
+  { category: "tool", text: "导航到岭南印象园，副驾空调22度，播放周杰伦的晴天" },
+  { category: "tool", text: "从当前位置导航到大学城南地铁站" },
   { category: "tool", text: "播放周杰伦的晴天" },
   { category: "tool", text: "我现在播放的音乐是什么" },
   { category: "tool", text: "请给我播放下一首歌" },

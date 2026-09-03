@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
+from pathlib import Path
+
 import torch
 from langchain_core.documents import Document
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
@@ -7,13 +9,28 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 class BGEM3ReRanker(object):
     def __init__(self, model_path, max_length=4096):
+        model_path = str(model_path).strip()
+        if not model_path:
+            raise ValueError("Reranker 模型路径不能为空")
+
+        local_path = Path(os.path.expandvars(os.path.expanduser(model_path)))
+        local_reference = local_path.is_absolute() or model_path.startswith((".", "~"))
+        if local_reference:
+            if not local_path.is_dir():
+                raise FileNotFoundError(
+                    f"Reranker 本地模型目录不存在: {local_path}。"
+                    "请设置 RAG_RERANKER_MODEL_PATH，或下载仓库默认模型。"
+                )
+            model_path = str(local_path.resolve())
 
         # 加载 rerank 模型
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.model = AutoModelForSequenceClassification.from_pretrained(model_path)
         self.model.eval()
-        self.model.half()
-        self.model.cuda()
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        if self.device.type == "cuda":
+            self.model.half()
+        self.model.to(self.device)
         self.max_length = max_length
 
 
@@ -26,7 +43,7 @@ class BGEM3ReRanker(object):
             truncation=True,
             return_tensors="pt",
             max_length=self.max_length,
-        ).to("cuda")
+        ).to(self.device)
         with torch.no_grad():
             scores = self.model(**inputs).logits
         scores = scores.detach().cpu().clone().numpy()

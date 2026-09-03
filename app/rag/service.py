@@ -10,6 +10,25 @@ _RETRY_AFTER_SEC = 12.0
 _MAX_IMAGES_PER_DOC = 8
 
 
+def _rag_error_hint(error: Exception) -> str:
+    """根据实际异常给出针对性提示，避免把所有加载错误都归因于 Milvus。"""
+    message = str(error).lower()
+    if "repo id must be in the form" in message or "reranker 本地模型目录不存在" in message:
+        return (
+            "[RAG] Reranker 模型路径无效。请检查 RAG_RERANKER_MODEL_PATH，"
+            "并确认 IDE 的工作目录是当前仓库。"
+        )
+    if (
+        "opened by another" in message
+        or "open local milvus" in message
+        or ("milvus.db" in message and "lock" in message)
+    ):
+        return "[RAG] milvus.db 正被其他进程占用，请只保留一个后端进程。"
+    if "cuda" in message:
+        return "[RAG] CUDA 初始化失败，请检查显卡环境或切换到 CPU。"
+    return "[RAG] 请根据上方异常检查模型、索引和数据库配置。"
+
+
 def _resolve_image_path(path: str) -> str:
     try:
         from src.utils import convert_db_path_to_local
@@ -74,7 +93,7 @@ class RagService:
                 self._error_ts = time.time()
                 self._engine = None
                 print(f"[RAG] 引擎加载失败: {e}")
-                print("[RAG] 常见原因：同时开了多个 python run.py，milvus.db 只能被一个进程打开。请只留一个后端。")
+                print(_rag_error_hint(e))
 
     @property
     def available(self) -> bool:

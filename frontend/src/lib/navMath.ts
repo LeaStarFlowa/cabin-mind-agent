@@ -34,7 +34,7 @@ export function advanceAlongArc(
 ): { pos: LngLat; progress: number; remaining: number; heading: number } {
   const { pts, cum, total } = table;
   if (!pts.length) {
-    return { pos: [116.316356, 39.957053], progress: 0, remaining: 0, heading: 0 };
+    return { pos: [113.396774, 23.033394], progress: 0, remaining: 0, heading: 0 };
   }
   if (pts.length === 1 || total <= 0) {
     return { pos: pts[0], progress: 0, remaining: 0, heading: 0 };
@@ -147,7 +147,7 @@ export function routeFingerprint(poly?: number[][] | null): string {
 }
 
 export const BIT_ORIGIN = {
-  name: "北京理工大学中关村校区南门",
-  lng: 116.316356,
-  lat: 39.957053,
+  name: "广东工业大学大学城校区南门",
+  lng: 113.396774,
+  lat: 23.033394,
 } as const;
