@@ -21,6 +21,7 @@ from pymilvus.model.reranker import BGERerankFunction
 from src.fields.manual_images import ManualImages
 from src.constant import test_doc_path, bge_m3_model_path, milvus_db_path
 from src.client.mongodb_config import MongoConfig
+from src.retriever.document_resolver import resolve_milvus_document
 
 
 EMB_BATCH = 50
@@ -173,12 +174,22 @@ class MilvusRetriever:
         # 关联mongo数据
         related_docs = []
         for result in hybrid_results:
-            search_res = mongo_collection.find_one({"unique_id": result["id"]})
+            unique_id = result.get("id")
+            try:
+                search_res = mongo_collection.find_one({"unique_id": unique_id})
+            except Exception as exc:
+                print(f"[Milvus] MongoDB 回查失败，降级使用索引文本: {exc}")
+                search_res = None
             #images_list = []
             #for image in search_res["metadata"]["images_info"]:
             #    images_list.append(ManualImages(**image))
             #search_res["metadata"]["images_info"] =  images_list 
-            doc = Document(page_content=search_res["page_content"], metadata=search_res["metadata"])
+            resolved = resolve_milvus_document(result, search_res)
+            if resolved is None:
+                print(f"[Milvus] 跳过缺少正文的索引记录: {unique_id}")
+                continue
+            page_content, metadata = resolved
+            doc = Document(page_content=page_content, metadata=metadata)
             related_docs.append(doc)
 
         return related_docs 
@@ -197,4 +208,3 @@ if __name__ == "__main__":
     for res in results:
         print(res)
         print("="*100)
-

@@ -133,7 +133,7 @@ class TraceStore:
 
     def append_turn(self, turn: TurnTrace) -> None:
         with self.path.open("a", encoding="utf-8") as f:
-            f.write(turn.model_dump_json(ensure_ascii=False) + "\n")
+            f.write(turn.model_dump_json() + "\n")
         if self._db and self._session_id:
             self._db.append_turn(self._session_id, turn)
 
